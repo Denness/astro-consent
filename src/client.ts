@@ -11,6 +11,9 @@ declare global {
 
 const link = (href: string, text: string) => `<a href="${href}">${text}</a>`;
 
+// Classes vanilla-cookieconsent puts on <html> to show and animate its modals.
+const HTML_CLASSES = ['cc--anim', 'show--consent', 'show--preferences', 'disable--interaction'];
+
 function buildConfig(cfg: ClientConfig, root: HTMLElement): CookieConsentConfig {
   const sync = ({ cookie }: { cookie: { categories: string[] } }) => window.__astroConsent?.apply(cookie.categories);
 
@@ -116,6 +119,16 @@ export function start(): void {
   document.body.appendChild(root);
   document.addEventListener('astro:after-swap', () => {
     if (!root.isConnected) document.body.appendChild(root);
+  });
+
+  // View transitions also replace <html>'s classes, which is where the library records
+  // whether the banner or preferences panel is showing. Carry them over, or an
+  // unanswered banner vanishes on the next page.
+  document.addEventListener('astro:before-swap', (event) => {
+    const next = (event as Event & { newDocument: Document }).newDocument.documentElement;
+    for (const name of HTML_CLASSES) {
+      if (document.documentElement.classList.contains(name)) next.classList.add(name);
+    }
   });
 
   // Delegated, so "Cookie settings" links in swapped-in markup still work.

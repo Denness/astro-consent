@@ -14,7 +14,7 @@ Google only requires a Google-certified CMP for sites that *show* Google ads (Ad
 ## Install
 
 ```bash
-npm install github:Denness/astro-consent#v1.0.0
+npm install github:Denness/astro-consent#v1.0.1
 ```
 
 ## Use

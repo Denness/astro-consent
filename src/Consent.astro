@@ -45,7 +45,7 @@ const themeCss = Object.keys(theme).length
   active && (
     <>
       {loaderId && <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${loaderId}`} />}
-      <script is:inline set:html={headScript({ gaId, adsId, clarityId, pageViewsOnNavigation })} />
+      <script is:inline set:html={headScript({ gaId, adsId, clarityId, revision, pageViewsOnNavigation })} />
       <script
         is:inline
         type="application/json"

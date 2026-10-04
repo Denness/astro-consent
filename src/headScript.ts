@@ -2,6 +2,7 @@ interface HeadScriptOptions {
   gaId?: string;
   adsId?: string;
   clarityId?: string;
+  revision: number;
   pageViewsOnNavigation: boolean;
 }
 
@@ -10,7 +11,7 @@ interface HeadScriptOptions {
  * first hit, then the Google tag config. Runs before the banner library has loaded,
  * so a returning visitor's page view already carries their consent.
  */
-export function headScript({ gaId, adsId, clarityId, pageViewsOnNavigation }: HeadScriptOptions): string {
+export function headScript({ gaId, adsId, clarityId, revision, pageViewsOnNavigation }: HeadScriptOptions): string {
   return `(function () {
   var w = window;
   w.dataLayer = w.dataLayer || [];
@@ -23,6 +24,7 @@ export function headScript({ gaId, adsId, clarityId, pageViewsOnNavigation }: He
   var GA_ID = ${JSON.stringify(gaId ?? '')};
   var ADS_ID = ${JSON.stringify(adsId ?? '')};
   var CLARITY_ID = ${JSON.stringify(clarityId ?? '')};
+  var REVISION = ${JSON.stringify(revision)};
   var gtag = w.gtag;
 
   function loadClarity() {
@@ -51,12 +53,14 @@ export function headScript({ gaId, adsId, clarityId, pageViewsOnNavigation }: He
     else if (typeof w.clarity === 'function') w.clarity('consent', false);
   }
 
-  // vanilla-cookieconsent stores its state as URL-encoded JSON in cc_cookie.
+  // vanilla-cookieconsent stores its state as URL-encoded JSON in cc_cookie. A choice
+  // made under an older revision doesn't count: the banner is about to ask again.
   function storedCategories() {
     var row = document.cookie.split('; ').filter(function (r) { return r.indexOf('cc_cookie=') === 0; })[0];
     if (!row) return null;
     try {
       var parsed = JSON.parse(decodeURIComponent(row.slice('cc_cookie='.length)));
+      if (parsed.revision !== REVISION) return null;
       return Array.isArray(parsed.categories) ? parsed.categories : null;
     } catch (e) {
       return null;
