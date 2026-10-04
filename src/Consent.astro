@@ -1,0 +1,64 @@
+---
+// Put once in <head>, before anything else that calls gtag().
+import 'vanilla-cookieconsent/dist/cookieconsent.css';
+import { headScript } from './headScript';
+import type { ClientConfig, ConsentProps } from './types';
+
+type Props = ConsentProps;
+
+const {
+  gaId,
+  adsId,
+  clarityId,
+  privacyUrl,
+  contactUrl,
+  revision = 1,
+  pageViewsOnNavigation = false,
+  theme = {},
+  enabled = import.meta.env.PROD,
+} = Astro.props;
+
+const analytics = Boolean(gaId || clarityId);
+const marketing = Boolean(adsId);
+const active = enabled && (analytics || marketing);
+
+// gtag.js takes one id in its URL; the others are attached with gtag('config').
+const loaderId = gaId || adsId;
+
+const clientConfig: ClientConfig = {
+  analytics,
+  marketing,
+  services: { ga: Boolean(gaId), ads: Boolean(adsId), clarity: Boolean(clarityId) },
+  privacyUrl,
+  contactUrl,
+  revision,
+};
+
+const themeCss = Object.keys(theme).length
+  ? `#cc-main{${Object.entries(theme)
+      .map(([key, value]) => `--cc-${key}:${value}`)
+      .join(';')}}`
+  : '';
+---
+
+{
+  active && (
+    <>
+      {loaderId && <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${loaderId}`} />}
+      <script is:inline set:html={headScript({ gaId, adsId, clarityId, pageViewsOnNavigation })} />
+      <script
+        is:inline
+        type="application/json"
+        id="astro-consent-config"
+        set:html={JSON.stringify(clientConfig).replace(/</g, '\\u003c')}
+      />
+      {themeCss && <style is:inline set:html={themeCss} />}
+    </>
+  )
+}
+
+<script>
+  // Does nothing unless the config above was rendered.
+  import { start } from './client';
+  start();
+</script>

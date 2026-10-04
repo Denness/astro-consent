@@ -1,0 +1,25 @@
+{
+  "name": "@denness/astro-consent",
+  "version": "1.0.0",
+  "description": "Cookie banner (vanilla-cookieconsent) wired to Google Consent Mode v2 for Astro sites: GA4, Google Ads and Microsoft Clarity.",
+  "type": "module",
+  "exports": {
+    ".": "./index.ts"
+  },
+  "files": [
+    "index.ts",
+    "src"
+  ],
+  "keywords": [
+    "astro-component",
+    "cookie-consent",
+    "consent-mode"
+  ],
+  "peerDependencies": {
+    "astro": ">=4.0.0"
+  },
+  "dependencies": {
+    "vanilla-cookieconsent": "^3.1.0"
+  },
+  "license": "MIT"
+}

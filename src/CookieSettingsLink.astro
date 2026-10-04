@@ -1,0 +1,12 @@
+---
+// Reopens the preferences panel, so people can change or withdraw consent.
+// Works anywhere on the page, including markup swapped in by view transitions.
+interface Props {
+  class?: string;
+  label?: string;
+}
+
+const { class: className, label = 'Cookie settings' } = Astro.props;
+---
+
+<button type="button" class={className} data-consent-settings>{label}</button>
