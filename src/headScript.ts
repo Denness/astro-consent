@@ -1,3 +1,29 @@
+/**
+ * Loads gtag.js on the first tap or key press, or 5 seconds after the page has loaded,
+ * so it doesn't compete with the first render. Calls made before then just queue in
+ * dataLayer.
+ */
+export function deferredTagLoader(loaderId: string): string {
+  return `(function () {
+  if (window.__astroConsentTagScheduled) return;
+  window.__astroConsentTagScheduled = true;
+  var src = 'https://www.googletagmanager.com/gtag/js?id=' + ${JSON.stringify(encodeURIComponent(loaderId))};
+  function load() {
+    if (window.__astroConsentTagLoaded) return;
+    window.__astroConsentTagLoaded = true;
+    var s = document.createElement('script');
+    s.async = true;
+    s.src = src;
+    document.head.appendChild(s);
+    removeEventListener('pointerdown', load);
+    removeEventListener('keydown', load);
+  }
+  addEventListener('pointerdown', load, { once: true, passive: true });
+  addEventListener('keydown', load, { once: true });
+  addEventListener('load', function () { setTimeout(load, 5000); }, { once: true });
+})();`;
+}
+
 interface HeadScriptOptions {
   gaId?: string;
   adsId?: string;

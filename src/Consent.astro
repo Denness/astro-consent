@@ -1,7 +1,7 @@
 ---
 // Put once in <head>, before anything else that calls gtag().
 import 'vanilla-cookieconsent/dist/cookieconsent.css';
-import { headScript } from './headScript';
+import { deferredTagLoader, headScript } from './headScript';
 import type { ClientConfig, ConsentProps } from './types';
 
 type Props = ConsentProps;
@@ -14,6 +14,7 @@ const {
   contactUrl,
   revision = 1,
   pageViewsOnNavigation = false,
+  loadTag = 'immediately',
   theme = {},
   enabled = import.meta.env.PROD,
 } = Astro.props;
@@ -44,7 +45,9 @@ const themeCss = Object.keys(theme).length
 {
   active && (
     <>
-      {loaderId && <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${loaderId}`} />}
+      {loaderId && loadTag === 'immediately' && (
+        <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${loaderId}`} />
+      )}
       <script is:inline set:html={headScript({ gaId, adsId, clarityId, revision, pageViewsOnNavigation })} />
       <script
         is:inline
@@ -52,6 +55,7 @@ const themeCss = Object.keys(theme).length
         id="astro-consent-config"
         set:html={JSON.stringify(clientConfig).replace(/</g, '\\u003c')}
       />
+      {loaderId && loadTag === 'on-interaction' && <script is:inline set:html={deferredTagLoader(loaderId)} />}
       {themeCss && <style is:inline set:html={themeCss} />}
     </>
   )
@@ -62,3 +66,27 @@ const themeCss = Object.keys(theme).length
   import { start } from './client';
   start();
 </script>
+
+<style is:global>
+  /* vanilla-cookieconsent stacks the bar's buttons under 640px with !important, turning
+     the bar into a half-screen sheet on phones. Keep them in one wrapping row instead. */
+  @media screen and (max-width: 640px) {
+    #cc-main .cm--bar .cm__btns,
+    #cc-main .cm--bar .cm__btn-group {
+      flex-direction: row !important;
+      flex-wrap: wrap;
+      gap: 0.375rem;
+    }
+    #cc-main .cm--bar .cm__btn + .cm__btn,
+    #cc-main .cm--bar .cm__btn-group + .cm__btn-group {
+      margin: 0 !important;
+    }
+    #cc-main .cm--bar .cm__btn {
+      flex: 1 1 auto !important;
+      min-width: 0;
+    }
+    #cc-main .cm--bar .cm__btn-group:last-child {
+      flex: 1 1 100%;
+    }
+  }
+</style>

@@ -17,6 +17,12 @@ export interface ConsentProps {
    * browser history events" switched off; otherwise GA4 already counts them.
    */
   pageViewsOnNavigation?: boolean;
+  /**
+   * When to load gtag.js. `immediately` (default) counts every visit. `on-interaction`
+   * waits for the first tap or key press, or 5 seconds after load: better PageSpeed,
+   * but someone who leaves within 5 seconds without touching the page isn't counted.
+   */
+  loadTag?: 'immediately' | 'on-interaction';
   /** Banner colours etc. Keys are vanilla-cookieconsent CSS variables without `--cc-`, e.g. `{ 'btn-primary-bg': '#1d4ed8' }`. */
   theme?: Record<string, string>;
   /** Defaults to production builds only, so dev and test runs send nothing to Google. */
